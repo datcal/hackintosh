@@ -1,0 +1,161 @@
+// Package icons holds small bitmap icons used across screens.
+// Each icon is horizontally packed (8 bits per byte, MSB-first), one row of
+// ceil(W/8) bytes after another.
+package icons
+
+// Icon is an 8-bpb horizontally-packed bitmap, ready for canvas.DrawBitmap.
+type Icon struct {
+	W, H int
+	Data []byte
+}
+
+// 12x12 sun (disc + small inner cross). Rays are drawn procedurally so they
+// can rotate — the icon itself is just the central disc.
+var SunDisc = Icon{12, 12, []byte{
+	0b00000000, 0b00000000,
+	0b00000000, 0b00000000,
+	0b00000111, 0b11100000,
+	0b00001111, 0b11110000,
+	0b00011111, 0b11111000,
+	0b00011111, 0b11111000,
+	0b00011111, 0b11111000,
+	0b00011111, 0b11111000,
+	0b00001111, 0b11110000,
+	0b00000111, 0b11100000,
+	0b00000000, 0b00000000,
+	0b00000000, 0b00000000,
+}}
+
+// 16x9 cloud — fluffy outline filled solid.
+var Cloud = Icon{16, 9, []byte{
+	0b00000111, 0b11000000,
+	0b00011111, 0b11110000,
+	0b00111111, 0b11111000,
+	0b01111111, 0b11111100,
+	0b11111111, 0b11111110,
+	0b11111111, 0b11111110,
+	0b11111111, 0b11111110,
+	0b01111111, 0b11111100,
+	0b00111111, 0b11111000,
+}}
+
+// 4x4 raindrop, used by the rain particle effect.
+var Raindrop = Icon{4, 4, []byte{
+	0b01000000,
+	0b11100000,
+	0b11100000,
+	0b01000000,
+}}
+
+// 4x4 snowflake (cross shape).
+var Snowflake = Icon{4, 4, []byte{
+	0b01000000,
+	0b11100000,
+	0b01000000,
+	0b00000000,
+}}
+
+// 7x9 bolt — used for thunder.
+var Bolt = Icon{7, 9, []byte{
+	0b00111100,
+	0b00111000,
+	0b01110000,
+	0b11110000,
+	0b11111100,
+	0b00011100,
+	0b00111000,
+	0b01110000,
+	0b11100000,
+}}
+
+// 9x9 leaf, slightly asymmetric so rotation looks natural.
+var Leaf = Icon{9, 9, []byte{
+	0b00000111, 0b00000000,
+	0b00011111, 0b10000000,
+	0b00111111, 0b11000000,
+	0b01111101, 0b11100000,
+	0b11111011, 0b11100000,
+	0b01110111, 0b11000000,
+	0b00011111, 0b10000000,
+	0b00000111, 0b00000000,
+	0b00000110, 0b00000000,
+}}
+
+// 8x8 play triangle.
+var Play = Icon{8, 8, []byte{
+	0b11000000,
+	0b11100000,
+	0b11110000,
+	0b11111000,
+	0b11111000,
+	0b11110000,
+	0b11100000,
+	0b11000000,
+}}
+
+// 8x8 pause (two vertical bars).
+var Pause = Icon{8, 8, []byte{
+	0b11011011,
+	0b11011011,
+	0b11011011,
+	0b11011011,
+	0b11011011,
+	0b11011011,
+	0b11011011,
+	0b11011011,
+}}
+
+// 7x9 music note — used by the media idle splash.
+var Note = Icon{7, 9, []byte{
+	0b00111000,
+	0b00111100,
+	0b00100100,
+	0b00100100,
+	0b00100100,
+	0b00100100,
+	0b11100100,
+	0b11100000,
+	0b01000000,
+}}
+
+// 5x7 up arrow — sized to match one line of Small text.
+var ArrowUp = Icon{5, 7, []byte{
+	0b00100000,
+	0b01110000,
+	0b11111000,
+	0b00100000,
+	0b00100000,
+	0b00100000,
+	0b00100000,
+}}
+
+// 5x7 down arrow.
+var ArrowDown = Icon{5, 7, []byte{
+	0b00100000,
+	0b00100000,
+	0b00100000,
+	0b00100000,
+	0b11111000,
+	0b01110000,
+	0b00100000,
+}}
+
+// 24x16 happy mac for the boot splash.
+var HappyMac = Icon{24, 16, []byte{
+	0b01111111, 0b11111111, 0b11111110,
+	0b10000000, 0b00000000, 0b00000001,
+	0b10000000, 0b00000000, 0b00000001,
+	0b10001110, 0b00000000, 0b01110001,
+	0b10001110, 0b00000000, 0b01110001,
+	0b10000000, 0b00000000, 0b00000001,
+	0b10000000, 0b00000000, 0b00000001,
+	0b10000000, 0b00000000, 0b00000001,
+	0b10000111, 0b00000000, 0b11100001,
+	0b10000011, 0b11111111, 0b11000001,
+	0b10000001, 0b11111111, 0b10000001,
+	0b10000000, 0b11111111, 0b00000001,
+	0b10000000, 0b00000000, 0b00000001,
+	0b10000000, 0b00000000, 0b00000001,
+	0b10000000, 0b00000000, 0b00000001,
+	0b01111111, 0b11111111, 0b11111110,
+}}

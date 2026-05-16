@@ -1,0 +1,17 @@
+dist/
+*.uf2
+*.hex
+*.bin
+*.elf
+*.png
+*.gif
+
+host/tinytashv2
+host/tinytashv2.exe
+
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+.claude
