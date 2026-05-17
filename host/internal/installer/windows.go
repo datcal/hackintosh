@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"syscall"
 
 	"golang.org/x/sys/windows/registry"
 )
@@ -131,6 +132,7 @@ func createShortcut(lnkPath, target string) error {
 	}
 	script := buildShortcutScript(lnkPath, target)
 	cmd := exec.Command("powershell", "-NoProfile", "-Command", "-")
+	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	cmd.Stdin = bytes.NewBufferString(script)
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr

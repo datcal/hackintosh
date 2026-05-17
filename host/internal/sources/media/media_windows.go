@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"os/exec"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/datcal/hackintosh/host/internal/store"
@@ -58,6 +59,7 @@ $result | ConvertTo-Json -Compress
 
 	cmd := exec.CommandContext(cctx, "powershell",
 		"-NoProfile", "-NonInteractive", "-Command", script)
+	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	var stdout bytes.Buffer
 	cmd.Stdout = &stdout
 	if err := cmd.Run(); err != nil {
