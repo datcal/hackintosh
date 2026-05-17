@@ -10,11 +10,11 @@ mkdir -p "$dist"
 cd "$root/host"
 version="$(git -C "$root" rev-parse --short HEAD 2>/dev/null || echo dev)"
 
-CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 \
+CGO_ENABLED=1 GOOS=darwin GOARCH=amd64 \
     go build -ldflags "-X main.version=$version -s -w" \
     -o "$dist/hackintosh-amd64" ./cmd/hackintosh
 
-CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 \
+CGO_ENABLED=1 GOOS=darwin GOARCH=arm64 \
     go build -ldflags "-X main.version=$version -s -w" \
     -o "$dist/hackintosh-arm64" ./cmd/hackintosh
 

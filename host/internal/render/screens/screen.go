@@ -27,5 +27,8 @@ func All() []Screen {
 		NewCurrency(),
 		NewSystem(),
 		NewMedia(),
+		NewPokemon(),
+		NewGermanWord(),
+		NewGermanMeaning(),
 	}
 }

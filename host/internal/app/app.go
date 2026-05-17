@@ -15,7 +15,10 @@ import (
 	"github.com/datcal/hackintosh/host/internal/store"
 )
 
-const FrameRate = 30 // frames per second
+const (
+	FrameRate       = 30   // frames per second
+	AutoAdvanceSecs = 12.0 // seconds before automatically cycling to the next screen
+)
 
 // App owns the render loop. Construct with New(), then Run(ctx) blocks until
 // ctx is canceled or the device closes.
@@ -28,6 +31,7 @@ type App struct {
 
 	chrome      *render.ChromeState
 	transition  *transitionState
+	screenAge   float64 // seconds since last screen change (for auto-advance)
 }
 
 type transitionState struct {
@@ -82,6 +86,13 @@ func (a *App) Run(ctx context.Context) error {
 				s.Tick(dt)
 			}
 
+			// Auto-advance: cycle to the next screen every AutoAdvanceSecs.
+			a.screenAge += dt
+			if a.screenAge >= AutoAdvanceSecs {
+				a.screenAge = 0
+				a.startTransition()
+			}
+
 			snap := a.store.Snapshot()
 
 			if a.transition.active {
@@ -131,6 +142,7 @@ func (a *App) handleButton(ev device.ButtonEvent) {
 		}
 	case device.BtnB:
 		if ev.Event == device.EvtPress {
+			a.screenAge = 0
 			a.startTransition()
 		}
 	}

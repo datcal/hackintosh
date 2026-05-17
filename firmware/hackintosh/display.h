@@ -1,5 +1,6 @@
 #pragma once
 #include <Arduino.h>
+#include "timer.h"
 
 namespace display {
 
@@ -9,5 +10,6 @@ void setBrightness(uint8_t b);
 void drawBootSplash();
 void drawDisconnectSplash(uint32_t tickMs);
 void drawBootloaderEnter();
+void drawTimerDisplay(timer::State state, uint32_t remainingMs, float progress, uint32_t tickMs);
 
 }
