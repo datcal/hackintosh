@@ -13,7 +13,7 @@ try {
     $env:CGO_ENABLED = "0"
     $out = Join-Path $dist "hackintosh.exe"
     go build `
-        -ldflags "-X main.version=$version -s -w" `
+        -ldflags "-X main.version=$version -s -w -H=windowsgui" `
         -o $out `
         ./cmd/hackintosh
     Write-Host "Built $out (version $version)"
