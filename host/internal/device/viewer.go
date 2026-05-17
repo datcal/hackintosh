@@ -120,7 +120,7 @@ const viewerHTML = `<!DOCTYPE html>
       </div>
     </div>
     <div class="buttons">
-      <button id="btnA" class="btn">A · Pomodoro<span class="key">key A or 1</span></button>
+      <button id="btnA" class="btn">A · Tea timer<span class="key">key A or 1</span></button>
       <button id="btnB" class="btn">B · Next screen<span class="key">key B or 2</span></button>
     </div>
   </div>

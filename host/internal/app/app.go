@@ -15,7 +15,11 @@ import (
 	"github.com/datcal/hackintosh/host/internal/store"
 )
 
-const FrameRate = 30 // frames per second
+const (
+	FrameRate           = 30  // frames per second
+	AutoRotateInterval  = 8.0 // seconds per screen during auto-rotation
+	ResumeAfterIdleSecs = 45.0 // seconds of no buttons before rotation resumes
+)
 
 // App owns the render loop. Construct with New(), then Run(ctx) blocks until
 // ctx is canceled or the device closes.
@@ -28,6 +32,9 @@ type App struct {
 
 	chrome      *render.ChromeState
 	transition  *transitionState
+
+	idleSecs   float64 // seconds since the last button event
+	rotateSecs float64 // seconds accumulated toward the next auto-rotation
 }
 
 type transitionState struct {
@@ -44,6 +51,9 @@ func New(dev device.Device, st *store.Store, timer *tea.Timer) *App {
 		scrn:   screens.All(),
 		chrome: render.NewChromeState(),
 		transition: &transitionState{},
+		// Start past the idle threshold so auto-rotation kicks in on boot
+		// instead of waiting 45s after the first frame.
+		idleSecs: ResumeAfterIdleSecs,
 	}
 }
 
@@ -80,6 +90,19 @@ func (a *App) Run(ctx context.Context) error {
 			a.chrome.Tick(dt)
 			for _, s := range a.scrn {
 				s.Tick(dt)
+			}
+
+			a.idleSecs += dt
+			if a.idleSecs >= ResumeAfterIdleSecs {
+				if !a.transition.active {
+					a.rotateSecs += dt
+					if a.rotateSecs >= AutoRotateInterval {
+						a.startTransition()
+						a.rotateSecs = 0
+					}
+				}
+			} else {
+				a.rotateSecs = 0
 			}
 
 			snap := a.store.Snapshot()
@@ -121,6 +144,8 @@ func (a *App) Run(ctx context.Context) error {
 }
 
 func (a *App) handleButton(ev device.ButtonEvent) {
+	a.idleSecs = 0
+	a.rotateSecs = 0
 	switch ev.ID {
 	case device.BtnA:
 		switch ev.Event {

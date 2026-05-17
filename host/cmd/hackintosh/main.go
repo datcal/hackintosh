@@ -208,7 +208,7 @@ func runSnapshot(dir string, scale int, demoData bool) {
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		log.Fatalf("mkdir %s: %v", dir, err)
 	}
-	pomo := tea.New()
+	timer := tea.New()
 	st := store.New()
 	if demoData {
 		populateDemoData(st)
@@ -240,9 +240,9 @@ func runSnapshot(dir string, scale int, demoData bool) {
 		}
 
 		c := render.New()
-		render.DrawChrome(c, chrome, scr.Name(), pomo.Snapshot())
+		render.DrawChrome(c, chrome, scr.Name(), timer.Snapshot())
 		scr.Render(c, st.Snapshot(), now)
-		render.DrawTimerStrip(c, pomo.Snapshot(), 0)
+		render.DrawTimerStrip(c, timer.Snapshot(), 0)
 
 		path := strings.ToLower(scr.Name()) + ".png"
 		fullPath := dir + string(os.PathSeparator) + path
@@ -368,9 +368,9 @@ func runAppSession(ctx context.Context, s *appSession, simulateAddr, portName st
 		go (&media.Worker{S: st}).Run(ctx)
 	}
 
-	// --- 3. Pomodoro + app loop ---
-	pomo := tea.New()
-	a := app.New(dev, st, pomo)
+	// --- 3. Tea timer + app loop ---
+	timer := tea.New()
+	a := app.New(dev, st, timer)
 	return a.Run(ctx)
 }
 
