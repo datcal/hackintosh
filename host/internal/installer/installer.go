@@ -47,6 +47,17 @@ func Uninstall() (Result, error) {
 	return doUninstall()
 }
 
+// InstalledBinaryPath returns the absolute path where Install copies the
+// binary on the current OS. Used by callers that want to spawn the installed
+// binary after Install returns.
+func InstalledBinaryPath() (string, error) {
+	home, err := userHome()
+	if err != nil {
+		return "", err
+	}
+	return installBinaryPath(home)
+}
+
 // formatPath is a tiny helper for consistent error messages.
 func formatPath(path string, err error) error {
 	return fmt.Errorf("%s: %w", path, err)

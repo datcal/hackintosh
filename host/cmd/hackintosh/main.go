@@ -420,6 +420,17 @@ func runInstall() {
 	}
 	fmt.Println("install complete:")
 	fmt.Print(res.String())
+
+	bin, err := installer.InstalledBinaryPath()
+	if err != nil {
+		log.Printf("could not locate installed binary to launch: %v", err)
+		return
+	}
+	if err := spawnDetached(bin); err != nil {
+		log.Printf("could not launch %s: %v", bin, err)
+		return
+	}
+	fmt.Println("launched in background. Look for the tray icon.")
 }
 
 func runUninstall() {
