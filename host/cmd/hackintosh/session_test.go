@@ -37,3 +37,14 @@ func TestSessionRunReturnsCallbackError(t *testing.T) {
 		t.Fatalf("got %v, want %v", got, want)
 	}
 }
+
+func TestSessionStopMarksQuit(t *testing.T) {
+	s := &appSession{}
+	if s.getQuit() {
+		t.Fatal("fresh session should not be marked quit")
+	}
+	s.stop()
+	if !s.getQuit() {
+		t.Fatal("after stop(), session should be marked quit")
+	}
+}

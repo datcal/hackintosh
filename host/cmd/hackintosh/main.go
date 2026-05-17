@@ -34,6 +34,7 @@ import (
 	"github.com/datcal/hackintosh/host/internal/sources/media"
 	"github.com/datcal/hackintosh/host/internal/store"
 	"github.com/datcal/hackintosh/host/internal/transport"
+	"github.com/datcal/hackintosh/host/internal/tray"
 )
 
 var version = "dev"
@@ -76,7 +77,11 @@ func main() {
 		runFlash(*flash, *flashTimeout)
 		return
 	}
-	runApp(*simulate, *port, *noNet, *noHW, *noMedia)
+	if *simulate == "" {
+		runTrayApp(*simulate, *port, *noNet, *noHW, *noMedia)
+	} else {
+		runApp(*simulate, *port, *noNet, *noHW, *noMedia)
+	}
 }
 
 // runFlash waits for the RPI-RP2 mass-storage drive to appear (the bootloader's
@@ -351,6 +356,38 @@ func runAppSession(ctx context.Context, s *appSession, simulateAddr, portName st
 	pomo := tea.New()
 	a := app.New(dev, st, pomo)
 	return a.Run(ctx)
+}
+
+// runTrayApp is the default mode when the binary is launched with no flags
+// (typically by autostart or by the user double-clicking the launcher
+// shortcut). It runs the systray on the main goroutine and the app session
+// on a child goroutine.
+func runTrayApp(simulateAddr, portName string, noNet, noHW, noMedia bool) {
+	s := &appSession{}
+	controller := newHostController(s)
+
+	go func() {
+		// Loop so that if the session exits cleanly (e.g., serial disconnect
+		// after the device was unplugged), the tray stays alive. Restart from
+		// the menu re-execs the whole binary so it's not handled here.
+		for {
+			err := s.run(func(ctx context.Context) error {
+				return runAppSession(ctx, s, simulateAddr, portName, noNet, noHW, noMedia)
+			})
+			if err != nil && err != context.Canceled {
+				log.Printf("app loop ended: %v", err)
+			}
+			// If quit was triggered, break out so we stop relooping.
+			if s.getQuit() {
+				return
+			}
+			// Otherwise wait a moment and try again -- this handles the
+			// "device was unplugged, will it come back?" case.
+			time.Sleep(2 * time.Second)
+		}
+	}()
+
+	tray.Run(controller)
 }
 
 func normalizeAddr(addr string) string {

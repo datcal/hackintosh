@@ -14,6 +14,7 @@ type appSession struct {
 	mu           sync.Mutex
 	cancel       context.CancelFunc
 	simulatorURL string
+	quit         bool
 }
 
 // run invokes work with a fresh cancellable context that also responds to
@@ -36,13 +37,21 @@ func (s *appSession) run(work func(ctx context.Context) error) error {
 	return work(ctx)
 }
 
-// stop cancels the active run, if any.
+// stop cancels the active run AND marks the session as quit so the tray's
+// run loop knows not to re-enter run().
 func (s *appSession) stop() {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	s.quit = true
 	if s.cancel != nil {
 		s.cancel()
 	}
+}
+
+func (s *appSession) getQuit() bool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.quit
 }
 
 // setSimulatorURL records the URL the in-process simulator is serving on,
