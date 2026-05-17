@@ -27,6 +27,7 @@ import (
 
 	"github.com/datcal/hackintosh/host/internal/app"
 	"github.com/datcal/hackintosh/host/internal/device"
+	"github.com/datcal/hackintosh/host/internal/installer"
 	"github.com/datcal/hackintosh/host/internal/tea"
 	"github.com/datcal/hackintosh/host/internal/render"
 	"github.com/datcal/hackintosh/host/internal/render/screens"
@@ -55,6 +56,21 @@ func main() {
 		flashTimeout = flag.Int("flash-timeout", 60, "seconds to wait for the RPI-RP2 drive when using --flash")
 		showVer   = flag.Bool("version", false, "print version and exit")
 	)
+
+	// Subcommand dispatch happens before flag parsing so users can type
+	// `hackintosh install` without the install/uninstall flags showing up
+	// in `--help`.
+	if len(os.Args) > 1 {
+		switch os.Args[1] {
+		case "install":
+			runInstall()
+			return
+		case "uninstall":
+			runUninstall()
+			return
+		}
+	}
+
 	flag.Parse()
 
 	if *showVer {
@@ -395,6 +411,24 @@ func normalizeAddr(addr string) string {
 		return "localhost" + addr
 	}
 	return addr
+}
+
+func runInstall() {
+	res, err := installer.Install()
+	if err != nil {
+		log.Fatalf("install failed: %v", err)
+	}
+	fmt.Println("install complete:")
+	fmt.Print(res.String())
+}
+
+func runUninstall() {
+	res, err := installer.Uninstall()
+	if err != nil {
+		log.Fatalf("uninstall failed: %v", err)
+	}
+	fmt.Println("uninstall complete:")
+	fmt.Print(res.String())
 }
 
 // --- legacy probe & helpers ---
