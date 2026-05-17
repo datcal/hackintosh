@@ -63,6 +63,50 @@ dist/hackintosh     --simulate=:8080
 · `--no-media` skips the now-playing source · `--port=COM5` picks a specific
 serial port.
 
+## Install as a startup app
+
+To have the host run automatically when you log in, with a menu-bar / tray
+icon instead of a terminal window:
+
+1. Build the host:
+   - Windows: `./scripts/build-host.ps1`
+   - macOS:   `./scripts/build-host.sh`
+   - Linux:   `cd host && go build -o ../dist/hackintosh ./cmd/hackintosh`
+2. Run the installer:
+
+   ```
+   ./dist/hackintosh install
+   ```
+
+   This copies the binary to a per-user location and registers it for
+   autostart. No admin/sudo required.
+3. The next time you log in, an icon appears in your system tray (Windows)
+   or menu bar (macOS) or app tray (Linux). Right-click for: Open Simulator
+   (only enabled in simulator mode), Restart, Quit.
+4. Re-launch from your Start Menu / Applications folder / app menu after
+   quitting, just like any other installed app.
+
+To remove everything the installer added:
+
+```bash
+./dist/hackintosh uninstall
+```
+
+After making code changes, rebuild and run `./dist/hackintosh install`
+again. It is idempotent and overwrites the previous binary.
+
+### Linux note: system trays in GNOME
+
+GNOME removed built-in tray support, so on stock GNOME the icon will not
+appear without an extension like AppIndicator or TopIconsPlus. The host
+still runs and connects to the device; only the menu is hidden.
+
+### macOS note: Gatekeeper
+
+The first run on macOS Catalina+ may trigger a Gatekeeper warning
+("Hackintosh cannot be opened"). Right-click the app in Finder, choose Open,
+or run `xattr -d com.apple.quarantine ~/Applications/Hackintosh.app` once.
+
 ## Controls
 
 - **Button A** — Tea timer: tap to start a 3-minute countdown, tap again to pause/resume, long-press to reset. "TEA!" appears on the OLED when it expires.
