@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"time"
 
 	"github.com/datcal/hackintosh/host/internal/openbrowser"
 )
@@ -31,6 +32,20 @@ func newHostController(s *appSession) *hostController {
 func (c *hostController) Quit() { c.quitFn() }
 
 func (c *hostController) Restart() {
+	// 1. Capture the done channel before cancelling so we can wait on it.
+	done := c.session.doneCh()
+	// 2. Cancel the active run so deferred cleanup (e.g. dev.Close()) executes.
+	//    os.Exit later would skip those defers entirely.
+	c.session.stop()
+	// 3. Wait for the session to actually return, or give up after a short
+	//    grace period if something is stuck.
+	if done != nil {
+		select {
+		case <-done:
+		case <-time.After(2 * time.Second):
+		}
+	}
+	// 4. Spawn the new process and exit ours.
 	if err := c.restartFn(); err != nil {
 		log.Printf("tray: restart failed (keeping current process running): %v", err)
 	}

@@ -83,3 +83,23 @@ func TestControllerSimulatorURLReadsFromSession(t *testing.T) {
 		t.Fatalf("SimulatorURL: got %q, want http://localhost:9000", got)
 	}
 }
+
+func TestControllerRestartStopsSessionBeforeRestartFn(t *testing.T) {
+	s := &appSession{}
+	order := []string{}
+	c := &hostController{
+		session: s,
+		openFn:  func(string) error { return nil },
+		restartFn: func() error {
+			order = append(order, "restartFn")
+			return nil
+		},
+		quitFn: func() {},
+	}
+	// Calling Restart on a fresh session: stop() on a session that has never
+	// run() is a no-op (cancel is nil, done is nil), then restartFn is called.
+	c.Restart()
+	if len(order) != 1 || order[0] != "restartFn" {
+		t.Fatalf("expected restartFn to be called once, got %v", order)
+	}
+}

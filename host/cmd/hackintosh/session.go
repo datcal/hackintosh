@@ -15,6 +15,7 @@ type appSession struct {
 	cancel       context.CancelFunc
 	simulatorURL string
 	quit         bool
+	done         chan struct{}
 }
 
 // run invokes work with a fresh cancellable context that also responds to
@@ -25,16 +26,29 @@ func (s *appSession) run(work func(ctx context.Context) error) error {
 
 	s.mu.Lock()
 	s.cancel = cancel
+	s.done = make(chan struct{})
+	doneCh := s.done
 	s.mu.Unlock()
 
 	defer func() {
 		s.mu.Lock()
 		s.cancel = nil
+		s.done = nil
 		s.mu.Unlock()
 		cancel()
+		close(doneCh)
 	}()
 
 	return work(ctx)
+}
+
+// doneCh returns the channel that is closed when the currently active run
+// returns. Returns nil if no run is active. The caller must ensure a run is
+// in flight before blocking on the returned channel.
+func (s *appSession) doneCh() chan struct{} {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.done
 }
 
 // stop cancels the active run AND marks the session as quit so the tray's
