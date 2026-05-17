@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Hackintosh
+Comment=Companion daemon for the OLED Mac-style display
+Exec=/home/u/.local/bin/hackintosh
+Icon=/home/u/.local/share/hackintosh/icon.png
+StartupNotify=false
+X-GNOME-Autostart-enabled=true
+Categories=Utility;

@@ -14,6 +14,10 @@ import (
 //go:embed icon.png
 var iconPNG []byte
 
+// IconBytes returns the PNG bytes of the application icon. Exported so the
+// installer package can write a copy to disk without duplicating the asset.
+func IconBytes() []byte { return iconPNG }
+
 // Controller is the small surface the tray uses to talk to the rest of the
 // app. The concrete implementation lives in cmd/hackintosh.
 type Controller interface {
