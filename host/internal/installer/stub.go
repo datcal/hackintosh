@@ -1,4 +1,4 @@
-//go:build !darwin && !linux
+//go:build !windows && !darwin && !linux
 
 package installer
 
