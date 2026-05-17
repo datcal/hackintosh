@@ -15,8 +15,12 @@ import (
 var iconPNG []byte
 
 // IconBytes returns the PNG bytes of the application icon. Exported so the
-// installer package can write a copy to disk without duplicating the asset.
+// installer package can write a copy to disk (e.g. for the Linux .desktop
+// entry). Always PNG, regardless of OS.
 func IconBytes() []byte { return iconPNG }
+
+// trayIcon is the bytes passed to systray.SetIcon. ICO on Windows, PNG
+// elsewhere -- selected via build tags in tray_icon_*.go.
 
 // Controller is the small surface the tray uses to talk to the rest of the
 // app. The concrete implementation lives in cmd/hackintosh.
@@ -55,7 +59,7 @@ type menuItems struct {
 func Run(c Controller) {
 	done := make(chan struct{})
 	systray.Run(func() {
-		systray.SetIcon(iconPNG)
+		systray.SetIcon(trayIcon)
 		systray.SetTitle("")
 		systray.SetTooltip("Hackintosh")
 
