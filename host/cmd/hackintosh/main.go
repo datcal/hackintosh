@@ -296,31 +296,40 @@ func writeFrameAsPNG(path string, frame []byte, scale int) error {
 }
 
 func runApp(simulateAddr, portName string, noNet, noHW, noMedia bool) {
-	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
-	defer cancel()
+	s := &appSession{}
+	if err := s.run(func(ctx context.Context) error {
+		return runAppSession(ctx, s, simulateAddr, portName, noNet, noHW, noMedia)
+	}); err != nil && err != context.Canceled {
+		log.Printf("app loop ended: %v", err)
+	}
+}
 
+// runAppSession is the actual work -- broken out so tray-mode can call it
+// repeatedly under fresh contexts on Restart.
+func runAppSession(ctx context.Context, s *appSession, simulateAddr, portName string, noNet, noHW, noMedia bool) error {
 	// --- 1. Pick a device backend ---
 	var dev device.Device
 	var err error
 	if simulateAddr != "" {
 		dev, err = device.NewSimulator(simulateAddr)
 		if err != nil {
-			log.Fatalf("simulator: %v", err)
+			return fmt.Errorf("simulator: %w", err)
 		}
-		log.Printf("simulating without hardware — open http://%s in a browser",
+		log.Printf("simulating without hardware -- open http://%s in a browser",
 			normalizeAddr(simulateAddr))
+		s.setSimulatorURL("http://" + normalizeAddr(simulateAddr))
 	} else {
 		if portName == "" {
 			guessed, gerr := guessPort()
 			if gerr != nil {
-				log.Fatalf("no serial port found (pass --port=COM5 or use --simulate=:8080): %v", gerr)
+				return fmt.Errorf("no serial port found (pass --port=COM5 or use --simulate=:8080): %w", gerr)
 			}
 			portName = guessed
 			log.Printf("auto-picked serial port: %s", portName)
 		}
 		dev, err = device.OpenSerial(ctx, portName)
 		if err != nil {
-			log.Fatalf("open serial %s: %v", portName, err)
+			return fmt.Errorf("open serial %s: %w", portName, err)
 		}
 	}
 	defer dev.Close()
@@ -341,9 +350,7 @@ func runApp(simulateAddr, portName string, noNet, noHW, noMedia bool) {
 	// --- 3. Pomodoro + app loop ---
 	pomo := tea.New()
 	a := app.New(dev, st, pomo)
-	if err := a.Run(ctx); err != nil && err != context.Canceled {
-		log.Printf("app loop ended: %v", err)
-	}
+	return a.Run(ctx)
 }
 
 func normalizeAddr(addr string) string {
