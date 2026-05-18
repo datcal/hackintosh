@@ -25,12 +25,15 @@ static Btn btns[2];
 
 // 0 = not currently in the A+B combo; otherwise the millis() at which the
 // combo started. Reset whenever either button is released.
-static uint32_t comboSince = 0;
+static uint32_t comboSince    = 0;
+static bool     pendingAPress = false;
+static bool     pendingALong  = false;
 
 static void onPress(Btn& b) {
     b.pressedSent  = true;
     b.longSent     = false;
     b.pressStartMs = millis();
+    if (b.id == BTN_ID_A) pendingAPress = true;
     transport::sendButton(b.id, BTN_EVT_PRESS);
 }
 
@@ -69,6 +72,7 @@ void poll() {
         if (b.rawDown && b.pressedSent && !b.longSent &&
             (now - b.pressStartMs) >= BTN_LONGPRESS_MS) {
             b.longSent = true;
+            if (b.id == BTN_ID_A) pendingALong = true;
             transport::sendButton(b.id, BTN_EVT_LONG);
         }
     }
@@ -92,5 +96,8 @@ void poll() {
         comboSince = 0;
     }
 }
+
+bool consumeAPress() { bool v = pendingAPress; pendingAPress = false; return v; }
+bool consumeALong()  { bool v = pendingALong;  pendingALong  = false; return v; }
 
 }

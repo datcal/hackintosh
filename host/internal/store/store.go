@@ -107,6 +107,28 @@ type Media struct {
 	UpdatedAt time.Time
 }
 
+// Pokemon holds the daily Pokémon fetched from PokeAPI.
+type Pokemon struct {
+	Valid     bool
+	ID        int
+	Name      string // Title-cased, e.g. "Bulbasaur"
+	Type1     string // e.g. "Fire"
+	Type2     string // empty if single-type
+	Sprite    []byte // 1-bit MSB-first row-major bitmap
+	SpriteW   int
+	SpriteH   int
+	UpdatedAt time.Time
+}
+
+// GermanWord holds the daily German vocabulary entry.
+type GermanWord struct {
+	Valid   bool
+	German  string // canonical spelling with umlauts
+	Turkish string
+	English string
+	DayIdx  int // 0-based index into the word list
+}
+
 // Store is the central, thread-safe snapshot container.
 type Store struct {
 	mu      sync.RWMutex
@@ -115,17 +137,21 @@ type Store struct {
 	cur     Currency
 	hw      HW
 	media   Media
+	pokemon Pokemon
+	german  GermanWord
 }
 
 func New() *Store { return &Store{} }
 
 // Snapshot is what the render loop reads each frame.
 type Snapshot struct {
-	Weather Weather
-	AQ      AirQuality
-	Currency Currency
-	HW      HW
-	Media   Media
+	Weather    Weather
+	AQ         AirQuality
+	Currency   Currency
+	HW         HW
+	Media      Media
+	Pokemon    Pokemon
+	GermanWord GermanWord
 }
 
 // Snapshot returns a copy safe for concurrent reading without locking.
@@ -133,16 +159,20 @@ func (s *Store) Snapshot() Snapshot {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	return Snapshot{
-		Weather:  s.weather,
-		AQ:       s.aq,
-		Currency: s.cur,
-		HW:       s.hw,
-		Media:    s.media,
+		Weather:    s.weather,
+		AQ:         s.aq,
+		Currency:   s.cur,
+		HW:         s.hw,
+		Media:      s.media,
+		Pokemon:    s.pokemon,
+		GermanWord: s.german,
 	}
 }
 
-func (s *Store) SetWeather(w Weather)   { s.mu.Lock(); s.weather = w; s.mu.Unlock() }
+func (s *Store) SetWeather(w Weather)       { s.mu.Lock(); s.weather = w; s.mu.Unlock() }
 func (s *Store) SetAirQuality(a AirQuality) { s.mu.Lock(); s.aq = a; s.mu.Unlock() }
-func (s *Store) SetCurrency(c Currency) { s.mu.Lock(); s.cur = c; s.mu.Unlock() }
-func (s *Store) SetHW(h HW)             { s.mu.Lock(); s.hw = h; s.mu.Unlock() }
-func (s *Store) SetMedia(m Media)       { s.mu.Lock(); s.media = m; s.mu.Unlock() }
+func (s *Store) SetCurrency(c Currency)     { s.mu.Lock(); s.cur = c; s.mu.Unlock() }
+func (s *Store) SetHW(h HW)                 { s.mu.Lock(); s.hw = h; s.mu.Unlock() }
+func (s *Store) SetMedia(m Media)           { s.mu.Lock(); s.media = m; s.mu.Unlock() }
+func (s *Store) SetPokemon(p Pokemon)       { s.mu.Lock(); s.pokemon = p; s.mu.Unlock() }
+func (s *Store) SetGermanWord(g GermanWord) { s.mu.Lock(); s.german = g; s.mu.Unlock() }

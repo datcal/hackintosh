@@ -281,6 +281,14 @@ func populateDemoData(st *store.Store) {
 		Playing: true, Position: 2*time.Minute + 14*time.Second, Length: 5*time.Minute + 55*time.Second,
 		UpdatedAt: now,
 	})
+	st.SetPokemon(store.Pokemon{
+		Valid: true, ID: 6, Name: "Charizard", Type1: "Fire", Type2: "Flying",
+		UpdatedAt: now,
+	})
+	st.SetGermanWord(store.GermanWord{
+		Valid: true, German: "die Freiheit", Turkish: "özgürlük", English: "freedom",
+		DayIdx: 42,
+	})
 }
 
 // writeFrameAsPNG converts the 1-bit SSD1306 page-major framebuffer to a PNG,
@@ -360,6 +368,7 @@ func runAppSession(ctx context.Context, s *appSession, simulateAddr, portName st
 	if !noNet {
 		go (&sources.WeatherWorker{S: st}).Run(ctx)
 		go (&sources.CurrencyWorker{S: st}).Run(ctx)
+		go (&sources.PokemonWorker{S: st}).Run(ctx)
 	}
 	if !noHW {
 		go (&sources.HWWorker{S: st}).Run(ctx)
@@ -367,6 +376,7 @@ func runAppSession(ctx context.Context, s *appSession, simulateAddr, portName st
 	if !noMedia {
 		go (&media.Worker{S: st}).Run(ctx)
 	}
+	go (&sources.GermanWorker{S: st}).Run(ctx)
 
 	// --- 3. Tea timer + app loop ---
 	timer := tea.New()

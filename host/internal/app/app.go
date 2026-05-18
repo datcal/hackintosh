@@ -16,8 +16,8 @@ import (
 )
 
 const (
-	FrameRate           = 30  // frames per second
-	AutoRotateInterval  = 8.0 // seconds per screen during auto-rotation
+	FrameRate           = 30   // frames per second
+	AutoRotateInterval  = 8.0  // seconds per screen during auto-rotation
 	ResumeAfterIdleSecs = 45.0 // seconds of no buttons before rotation resumes
 )
 
